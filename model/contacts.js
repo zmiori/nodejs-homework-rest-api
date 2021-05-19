@@ -10,7 +10,10 @@ const getContactById = async (contactId) => {
   return db.get("contacts").find({ id: contactId }).value();
 };
 
-const removeContact = async (contactId) => {};
+const removeContact = async (contactId) => {
+  const [record] = db.get("contacts").remove({ id: contactId }).write();
+  return record;
+};
 
 const addContact = async (body) => {
   const id = uuidv4();

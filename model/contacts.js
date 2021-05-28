@@ -1,38 +1,35 @@
 // const fs = require('fs/promises')
-const db = require("./db");
-const { v4: uuidv4 } = require("uuid");
+const Contact = require("./schemas/contacts");
 
 const listContacts = async () => {
-  return db.get("contacts").value();
+  const result = await Contact.find({});
+  return result;
 };
 
 const getContactById = async (contactId) => {
-  return db.get("contacts").find({ id: contactId }).value();
+  const result = await Contact.findOne({ _id: contactId });
+  return result;
 };
 
 const removeContact = async (contactId) => {
-  const [record] = db.get("contacts").remove({ id: contactId }).write();
-  return record;
+  const result = await Contact.findByIdAndRemove({ _id: contactId });
+  return result;
 };
 
 const addContact = async (body) => {
-  const id = uuidv4();
-  const contact = {
-    id,
-    ...body,
-  };
-  db.get("contacts").push(contact).write();
-  return contact;
+  const result = await Contact.create(body);
+  return result;
 };
 
 const updateContact = async (contactId, body) => {
-  const record = db
-    .get("contacts")
-    .find({ id: contactId })
-    .assign(body)
-    .value();
-  db.write();
-  return record.id ? record : null;
+  const result = await Contact.findByIdAndUpdate(
+    {
+      _id: contactId,
+    },
+    { ...body },
+    { new: true }
+  );
+  return result;
 };
 
 module.exports = {

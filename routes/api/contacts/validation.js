@@ -1,12 +1,12 @@
 const Joi = require("joi");
 
 const schemaAddContact = Joi.object({
-  name: Joi.string().alphanum().min(2).max(60).required(),
+  name: Joi.string().min(2).max(60).required(),
 
   email: Joi.string().email({
     minDomainSegments: 2,
   }),
-  phone: [Joi.string().min(4).max(10), Joi.number().min(4).max(10)],
+  phone: [Joi.string().min(4).max(20), Joi.number().min(4).max(10)],
   favorite: Joi.boolean().optional(),
 });
 

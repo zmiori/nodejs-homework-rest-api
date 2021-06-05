@@ -20,7 +20,7 @@ const register = async (req, res, next) => {
     }
 
     const newUser = await Users.createUser(req.body);
-    const { id, email, subscription } = newUser;
+    const { id, email, subscription, avatarURL } = newUser;
 
     return res.status(HttpCode.CREATED).json({
       status: "success",
@@ -28,6 +28,7 @@ const register = async (req, res, next) => {
       data: {
         id,
         email,
+        avatarURL,
         subscription,
       },
     });
@@ -106,10 +107,19 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
+const updateAvatar = (req, res, next) => {
+  try {
+    return res.json({});
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   register,
   login,
   logout,
   getUser,
   updateSubscription,
+  updateAvatar,
 };

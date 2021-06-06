@@ -3,8 +3,10 @@ require("dotenv").config();
 
 const Users = require("../model/users");
 const { HttpCode } = require("../helpers/constants");
+const UploadAvatar = require("../services/upload-avatars");
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
 
 const register = async (req, res, next) => {
   try {
@@ -93,12 +95,12 @@ const updateSubscription = async (req, res, next) => {
     const user = await Users.updateUser(userId, req.body);
     if (user) {
       return res
-        .status(200)
-        .json({ status: "success", code: "200", data: { user } });
+        .status(HttpCode.OK)
+        .json({ status: "success", code: HttpCode.OK, data: { user } });
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: "error",
-        code: "404",
+        code: HttpCode.NOT_FOUND,
         message: "Not found",
       });
     }
@@ -107,9 +109,20 @@ const updateSubscription = async (req, res, next) => {
   }
 };
 
-const updateAvatar = (req, res, next) => {
+const updateAvatar = async (req, res, next) => {
   try {
-    return res.json({});
+    const id = req.user.id;
+    const uploads = new UploadAvatar(AVATARS_OF_USERS);
+    const avatarURL = await uploads.saveAvatarToStatic({
+      userId: id,
+      pathFile: req.file.path,
+      name: req.file.filename,
+      oldFile: req.user.avatarURL,
+    });
+    await Users.updateAvatar(id, avatarURL);
+    return res
+      .status(HttpCode.OK)
+      .json({ status: "success", code: HttpCode.OK, data: { avatarURL } });
   } catch (error) {
     next(error);
   }

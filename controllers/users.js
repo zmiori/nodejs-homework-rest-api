@@ -1,9 +1,11 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const Users = require("../model/users");
+const Users = require("../repository/users");
 const { HttpCode } = require("../helpers/constants");
 const UploadAvatar = require("../services/upload-avatars");
+const EmailService = require("../services/email");
+const CreateSender = require("../services/email-sender");
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const AVATARS_OF_USERS = process.env.AVATARS_OF_USERS;
@@ -22,7 +24,19 @@ const register = async (req, res, next) => {
     }
 
     const newUser = await Users.createUser(req.body);
-    const { id, email, subscription, avatarURL } = newUser;
+    const { id, name, email, subscription, avatarURL, verificationToken } =
+      newUser;
+    // send email
+    try {
+      const emailService = new EmailService(
+        process.env.NODE_ENV,
+        new CreateSender()
+      );
+
+      await emailService.sendVerificationEmail(verificationToken, email, name);
+    } catch (e) {
+      console.log(e.message);
+    }
 
     return res.status(HttpCode.CREATED).json({
       status: "success",
@@ -51,6 +65,15 @@ const login = async (req, res, next) => {
         status: "error",
         code: HttpCode.UNAUTHORIZED,
         message: "Email or password is wrong",
+      });
+    }
+
+    if (!user.verify) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: "error",
+        code: HttpCode.UNAUTHORIZED,
+        message:
+          "Your account is not verified. Please check your email to complete registration",
       });
     }
 

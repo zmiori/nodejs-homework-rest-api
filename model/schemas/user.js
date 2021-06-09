@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { Schema, model } = require("mongoose");
+const { nanoid } = require("nanoid");
 
 const { Subscription } = require("../../helpers/constants");
 const bcrypt = require("bcryptjs");
@@ -31,6 +31,15 @@ const userSchema = new Schema({
       return gravatar.url(this.email, { s: "250" }, true);
     },
   },
+  verify: {
+    type: Boolean,
+    default: false,
+  },
+  verificationToken: {
+    type: String,
+    required: [true, "Verification token is required"],
+    default: nanoid(),
+  },
 });
 
 userSchema.pre("save", async function (next) {
@@ -46,6 +55,6 @@ userSchema.methods.validPassword = async function (password) {
   return await bcrypt.compare(String(password), this.password);
 };
 
-const User = mongoose.model("user", userSchema);
+const User = model("user", userSchema);
 
 module.exports = User;

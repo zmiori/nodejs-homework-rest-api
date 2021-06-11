@@ -1,6 +1,6 @@
 const passport = require("passport");
 const { Strategy, ExtractJwt } = require("passport-jwt");
-const Users = require("../model/users");
+const Users = require("../repository/users");
 
 require("dotenv").config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
@@ -18,6 +18,10 @@ passport.use(
         return done(new Error("User not found"), false);
       }
       if (!user.token) {
+        return done(null, false);
+      }
+
+      if (!user.verify) {
         return done(null, false);
       }
 

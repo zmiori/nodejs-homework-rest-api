@@ -1,5 +1,5 @@
 // const fs = require('fs/promises')
-const Contact = require("./schemas/contacts");
+const Contact = require("../model/schemas/contacts");
 
 const listContacts = async (userId, query) => {
   const { limit = 20, page = 1, favorite = null } = query;
